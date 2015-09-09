@@ -8,6 +8,7 @@ void MainWindow::fun()
     qDebug("entry func !!\n");
     ZTPprotocol ztpp;
     ztpm->getOneZtp(ztpp);
+
     QList<QString> paraList = ztpp.paras();
     for(int i = 0;i< paraList.length();i++)
     {
@@ -15,8 +16,11 @@ void MainWindow::fun()
         qDebug()<<text;
         ui->textBrowser->textCursor().insertText(text);
     }
+    if(ztpp.getPara("reponse") == "hi")
+        return;
+    ztpp.clear();
     ztpp.addPara("reponse","hi");
-    ztpm->SendOneZtp(ztpp,QHostAddress(ztpp.getPara("RemoteHost")),ztpp.getPara("RemotePort").toInt());
+    ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
 }
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,4 +45,9 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    ui->textBrowser->clear();
 }

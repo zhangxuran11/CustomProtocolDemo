@@ -28,6 +28,11 @@ void ZTPprotocol::clear()
     rawData.clear();
 }
 
+void ZTPprotocol::removePara(const QString& paraName)
+{
+    map.remove(paraName);
+}
+
 void ZTPprotocol::addPara(const QString& paraName,const QString& paraValue)
 {
     map.insert(paraName,paraValue);

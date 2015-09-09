@@ -9,10 +9,11 @@ class ZTPprotocol
     QMap<QString, QString> map;
     QByteArray rawData;
 public:
-    ZTPprotocol(){};
+    ZTPprotocol(){}
     explicit ZTPprotocol(QByteArray& bytes);
     QString getPara(const QString& paraName){return map[paraName];}
     void addPara(const QString& paraName,const QString& paraValue);
+    void removePara(const QString& paraName);
 
     int count()const{return map.count();}
     QList<QString> paras(){return map.keys();}

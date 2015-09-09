@@ -27,11 +27,11 @@ public:
     ResultState getOneZtp(ZTPprotocol& ztp);//异步读取
     ResultState waitOneZtp(ZTPprotocol& ztp,int msecs = 3000);//同步读取
     ResultState SendOneZtp(ZTPprotocol& ztp,const QHostAddress& host,quint16 port);
-    
+
 signals:
     void new_ztp();
 public slots:
-    
+
 };
 
 
