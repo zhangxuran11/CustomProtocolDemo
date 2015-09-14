@@ -7,6 +7,7 @@ class QString;
 class ZTPprotocol
 {
     QMap<QString, QString> map;
+    //QMap<QString, QByteArray> map;
     QByteArray rawData;
 public:
     ZTPprotocol(){}

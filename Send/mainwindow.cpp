@@ -3,6 +3,7 @@
 #include<ztpmanager.h>
 #include<ztpprotocol.h>
 #include<QHostAddress>
+#include <QFile>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -37,6 +38,21 @@ void MainWindow::on_pushButton_clicked()
     ZTPprotocol ztpp;
     ztpp.addPara("type","hellow");
     ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
+
+    //QUdpSocket udp;
+    //udp.bind(QHostAddress::Any);
+    //QFile file("test.png");
+    //file.open(QFile::ReadOnly);
+    //qDebug()<<"file readall :"<<file.readAll().length();
+    //qDebug()<<"file readall :"<<file.readAll().length();
+    //qDebug()<<"udp send len :"<<udp.writeDatagram(file.readAll().data(),65507,QHostAddress("224.124.0.1"),3333);
+    //file.close();
+//    ztpp.clear();
+//    ztpp.addPara("T","file");
+//    ztpp.addPara("name","test.png");
+//    QImage("")
+//    ztpp.addPara("content",QImage("test.png").);
+//    ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
 
 
 }

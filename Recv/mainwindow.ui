@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>685</width>
-    <height>414</height>
+    <width>913</width>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,31 +17,31 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>130</y>
-      <width>256</width>
-      <height>192</height>
+      <x>40</x>
+      <y>120</y>
+      <width>251</width>
+      <height>481</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>50</y>
+      <x>340</x>
+      <y>70</y>
       <width>98</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start</string>
+     <string>image</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>50</y>
+      <x>30</x>
+      <y>70</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -50,16 +50,19 @@
      <string>clean</string>
     </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>685</width>
-     <height>26</height>
-    </rect>
-   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>130</y>
+      <width>500</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -69,7 +72,6 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

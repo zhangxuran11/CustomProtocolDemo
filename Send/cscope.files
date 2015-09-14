@@ -1,0 +1,7 @@
+./ztpprotocol.cpp
+./mainwindow.h
+./ztpprotocol.h
+./mainwindow.cpp
+./ztpmanager.h
+./ztpmanager.cpp
+./main.cpp
