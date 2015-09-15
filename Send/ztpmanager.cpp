@@ -1,6 +1,7 @@
 #include "ztpmanager.h"
 #include <QtAlgorithms>
 #include <QEventLoop>
+#include<QThread>
 Fragment::Fragment(const QByteArray& bytes)
 {
 	rawPkg = bytes;
@@ -51,8 +52,9 @@ ZTPManager::ZTPManager(QHostAddress host,quint16 port,
         _Socketlistener.joinMulticastGroup(groupAddress);
         //_Socketlistener.setSocketOption(QAbstractSocket::MulticastTtlOption, 5);
     }
-    connect(&_Socketlistener,SIGNAL(readyRead()),this,SLOT(onRead()));
-    MTU = 65507;
+    connect(&_Socketlistener,SIGNAL(readyRead()),this,SLOT(onRead()),Qt::AutoConnection);
+    MTU = 60000;
+    _timeout = 3000;
 }
 ZTPManager::ZTPManager(quint16 port,
            QHostAddress groupAddress, QObject *parent):
@@ -64,8 +66,10 @@ ZTPManager::ZTPManager(quint16 port,
         _Socketlistener.joinMulticastGroup(groupAddress);
         //_Socketlistener.setSocketOption(QAbstractSocket::MulticastTtlOption, 5);
     }
-    connect(&_Socketlistener,SIGNAL(readyRead()),this,SLOT(onRead()));
-    MTU = 65507;
+    connect(&_Socketlistener,SIGNAL(readyRead()),this,SLOT(onRead()),Qt::AutoConnection);
+    MTU = 60000;
+    _timeout = 3000;
+
 }
 ZTPManager::ResultState ZTPManager::getOneZtp(ZTPprotocol& ztp)
 {
@@ -78,24 +82,6 @@ ZTPManager::ResultState ZTPManager::getOneZtp(ZTPprotocol& ztp)
     ztp = *pztp;
     delete pztp;
     return SUCCESS;
-//    QHostAddress remoteHost;
-//    quint16 remotePort;
-//    QByteArray recvBuff(_Socketlistener.pendingDatagramSize(),'\0');
-//    qint64 pendingLen = _Socketlistener.readDatagram(recvBuff.data(),recvBuff.length(),&remoteHost,&remotePort);
-//    qint64 len;
-//    memcpy(&len,recvBuff.data()+6,8);
-//    if(pendingLen!=len)
-//    {
-//        qDebug("recv ZTP data error: has data %lld bytes and actually recv %lld bytes!!\n",
-//               len,pendingLen);
-//        return FAILED;
-//    }
-//    ztp.clear();
-//    ztp.load(recvBuff);
-//    ztp.addPara("RemoteHost",remoteHost.toString());
-//    ztp.addPara("RemotePort",QString::number(remotePort));
-
-//    return SUCCESS;
 }
 ZTPManager::ResultState ZTPManager::waitOneZtp(ZTPprotocol& ztp,int msecs)
 {
@@ -112,34 +98,6 @@ ZTPManager::ResultState ZTPManager::waitOneZtp(ZTPprotocol& ztp,int msecs)
     {
         return SUCCESS;
     }
-//    QHostAddress remoteHost;
-//    quint16 remotePort;
-//    if(!_Socketlistener.waitForReadyRead(msecs))
-//    {
-//        if(_Socketlistener.error() == QUdpSocket::SocketTimeoutError)
-//            return TIMEOUT;
-//        else
-//        {
-//            qDebug("Socket error!!\n");
-//            return FAILED;
-//        }
-//    }
-//    QByteArray recvBuff(_Socketlistener.pendingDatagramSize(),'\0');
-//    qint64 pendingLen = _Socketlistener.readDatagram(recvBuff.data(),recvBuff.length(),&remoteHost,&remotePort);
-//    qint64 len;
-//    memcpy(&len,recvBuff.data()+6,8);
-//    if(pendingLen!=len)
-//    {
-//        qDebug("recv ZTP data error: has data %lld bytes and actually recv %lld bytes!!\n",
-//               len,pendingLen);
-//        return FAILED;
-//    }
-//    ztp.clear();
-//    ztp.load(recvBuff);
-//    ztp.addPara("RemoteHost",remoteHost.toString());
-//    ztp.addPara("RemotePort",QString::number(remotePort));
-
-//    return SUCCESS;
 }
 
 ZTPManager::ResultState ZTPManager::SendOneZtp(ZTPprotocol& ztp,const QHostAddress &host,quint16 port)
@@ -154,67 +112,58 @@ ZTPManager::ResultState ZTPManager::SendOneZtp(ZTPprotocol& ztp,const QHostAddre
 		Fragment fragment;
 		fragment.identifier = identifier; //用utc的低16位作为分片标识
 		fragment.fragment_count = fragment_count;
-		fragment.fragment_offset = fragment_offset++;
-        qDebug()<<"1 ztp.getRwaData len = "<<ztp.getRwaData().length() << "ztp.getRwaData()= "<<ztp.getRwaData();
+        fragment.fragment_offset = fragment_offset++;
         fragment.data = ztp.getRwaData().left(MTU);
-        qDebug()<<"MTU = "<<MTU;
         ztp.getRwaData().remove(0,MTU);
-        qDebug()<<"2 ztp.getRwaData len = "<<ztp.getRwaData().length() << "ztp.getRwaData()= "<<ztp.getRwaData();
-        qDebug()<<"3 fragment.data len = "<<fragment.data.length() << "fragment.data()= "<<fragment.data;
-		fragment.len = fragment.data.length();
-        qDebug()<<"fragment.len = "<<fragment.len << "fragment.data= "<<fragment.data;
-		fragment.generate();
-        for(int i = 0;i < fragment.rawPkg.length();i++)
-        {
-            //qDebug("%2d %2x---%c\n",i,(unsigned char)fragment.rawPkg.data()[i],(unsigned char)fragment.rawPkg.data()[i]);
-        }
-		int sendLen = _Socketlistener.writeDatagram(fragment.rawPkg,host,port);
+        fragment.len = fragment.data.length();
+        fragment.generate();
+        int sendLen = _Socketlistener.writeDatagram(fragment.rawPkg,host,port);
 		if(sendLen != fragment.rawPkg.length())
 		{
 			qDebug("send ZTP data error: has data %d bytes and actually send %d bytes!!\n",
-					ztp.getRwaData().length(),sendLen);
+                    fragment.len,sendLen);
 			return FAILED;
 		}
-	}
+//        qDebug()<<"send---fragment : "<<fragment.identifier<<" "<<fragment.checksum<<" "<<fragment.fragment_count<<" "<<fragment.fragment_offset<<" "<<fragment.data.length();
+        msleep(1);
+    }
 
 	return SUCCESS;
 }
-
+static bool lessThan(const Fragment* frag1, const Fragment* frag2)
+ {
+     return frag1->fragment_offset < frag2->fragment_offset;
+ }
+void ZTPManager::msleep(int msecs)
+{
+    QEventLoop q;
+    QTimer::singleShot(msecs,&q,SLOT(quit()));
+    q.exec();
+}
 void ZTPManager::onRead()
 {
-    qDebug()<<"11111111111111111111111111";
     QHostAddress remoteHost;
     quint16 remotePort;
     QByteArray recvBuff(_Socketlistener.pendingDatagramSize(),'\0');
     qint64 pendingLen = _Socketlistener.readDatagram(recvBuff.data(),recvBuff.length(),&remoteHost,&remotePort);
-    qDebug()<<"22222222222222222222222222 pendingLen = "<<pendingLen;
     Fragment* fragment = new Fragment(recvBuff);
-    qDebug()<<"333333333333333333333333333";
-    qDebug()<<"fragment :"<<fragment->identifier<<" "<<fragment->checksum<<" "<<fragment->fragment_count<<" "<<fragment->fragment_offset<<" "<<fragment->len<<" "<<fragment->data;
+//    qDebug()<<"fragment :"<<fragment->identifier<<" "<<fragment->checksum<<" "<<fragment->fragment_count<<" "<<fragment->fragment_offset<<" "<<fragment->len;
+//    qDebug()<<"fragment isvalid:"<<fragment->isValid();
     if(!workMap.contains(fragment->identifier))
-	{
-        qDebug()<<"4444444444444444444444444444";
+    {
         workMap.insert(fragment->identifier,new FragmentList(fragment->identifier));
-        qDebug()<<"55555555555555555555555555";
-        //connect(workMap[fragment->identifier],SIGNAL(timeout(quint16)),this,SLOT(onTimeout(quint16)));
+        connect(workMap[fragment->identifier],SIGNAL(timeout(quint16)),this,SLOT(onTimeout(quint16)));
     }
-    qDebug()<<"6666666666666666666666666666666";
     workMap[fragment->identifier]->timer.start(_timeout);
-    qDebug()<<"7777777777777777777777777777";
     workMap[fragment->identifier]->fragment_list.append(fragment);
-    qDebug()<<"88888888888888888888888888";
     if(workMap[fragment->identifier]->fragment_list.length() == fragment->fragment_count)
-	{
-        qDebug()<<"9999999999999999999999999999";
-        qSort(workMap[fragment->identifier]->fragment_list);
-        qDebug()<<"000000000000000000000000000000";
+    {
+        qSort(workMap[fragment->identifier]->fragment_list.begin(),workMap[fragment->identifier]->fragment_list.end(),lessThan);
 		QByteArray recvBuff;
         for(int i = 0; i < fragment->fragment_count;i++)
         {
-            qDebug()<<"11 11 11 1111 11 11 11 11 11 11 11 11 11 11 11 11";
             recvBuff.append(workMap[fragment->identifier]->fragment_list[i]->data);
         }
-        qDebug()<<"12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 ";
         FragmentList* node = workMap[fragment->identifier];
         workMap.remove(fragment->identifier);
         delete node;
@@ -230,10 +179,5 @@ void ZTPManager::onRead()
         ztp->addPara("RemotePort",QString::number(remotePort));
         ztpList.append(ztp);
 		emit readyRead();
-
-
     }
-
-
-
 }

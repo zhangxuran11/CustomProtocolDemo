@@ -5,7 +5,27 @@ ZTPprotocol::ZTPprotocol(QByteArray &bytes)
 {
     load(bytes);
 }
+static QList<QByteArray> split(const QByteArray& bytes,const QByteArray & sep)
+{
+    QList<QByteArray> resList;
+    int off = 0,pos = 0;
+    while(true)
+    {
+        pos = bytes.indexOf(sep,off);
+        if(pos == -1)
+        {
+            resList.append(bytes.mid(off,-1));
+            break;
+        }
+        else
+        {
+            resList.append(bytes.mid(off,pos-off));
+        }
+        off = pos + sep.length();
+    }
+    return resList;
 
+}
 //"&head&64位无符号长度&|&paraName1:|:paraValue1&|&paraName2:|:paraValue2&end&"
 void ZTPprotocol::load(QByteArray& bytes)
 {
@@ -13,12 +33,12 @@ void ZTPprotocol::load(QByteArray& bytes)
     bytes.remove(pos,17);
     pos = bytes.indexOf("&end&");
     bytes.remove(pos,5);
-    QStringList strList = QString::fromUtf8(bytes.data(),bytes.length()).split("&|&");
+    QList<QByteArray> strList = split(bytes,"&|&");
     for(int i = 0;i<strList.length();i++)
     {
-        QStringList subList = strList[i].split(":|:");
+        QList<QByteArray> subList = split(strList[i],":|:");
         QString k = subList[0];
-        QString v = subList[1];
+        QByteArray v = subList[1];
         map.insert(k,v);
     }
 }
@@ -35,9 +55,14 @@ void ZTPprotocol::removePara(const QString& paraName)
 
 void ZTPprotocol::addPara(const QString& paraName,const QString& paraValue)
 {
-    map.insert(paraName,paraValue);
+    map.insert(paraName,paraValue.toUtf8());
 }
 
+void ZTPprotocol::addPara(const QString& paraName,const QByteArray& paraValue,EType type )
+{
+    if(type == FILE)
+        map.insert(paraName,paraValue);
+}
 void ZTPprotocol::genarate()
 {
     QList<QString> keyList = map.keys();
@@ -47,7 +72,7 @@ void ZTPprotocol::genarate()
         rawData.append("&|&");
         rawData.append(keyList[i].toUtf8());
         rawData.append(":|:");
-        rawData.append(map[keyList[i]].toUtf8());
+        rawData.append(map[keyList[i]]);
     }
     rawData.append("&end&");
     qint64 len = rawData.length();

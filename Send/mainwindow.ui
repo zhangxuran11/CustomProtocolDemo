@@ -32,22 +32,35 @@
      <rect>
       <x>20</x>
       <y>90</y>
-      <width>271</width>
-      <height>261</height>
+      <width>201</width>
+      <height>241</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>50</y>
+      <x>390</x>
+      <y>20</y>
       <width>98</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>clear</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>90</y>
+      <width>281</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>

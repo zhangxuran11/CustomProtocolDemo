@@ -108,6 +108,7 @@ private slots:
 		workMap.remove(identifier);
         delete node;
     }
+    void msleep(int msecs);
 
 };
 

@@ -6,13 +6,15 @@
 class QString;
 class ZTPprotocol
 {
-    QMap<QString, QString> map;
+    QMap<QString, QByteArray> map;
     QByteArray rawData;
 public:
+    enum EType{FILE};
     ZTPprotocol(){}
     explicit ZTPprotocol(QByteArray& bytes);
-    QString getPara(const QString& paraName){return map[paraName];}
+    QByteArray getPara(const QString& paraName){return map[paraName];}
     void addPara(const QString& paraName,const QString& paraValue);
+    void addPara(const QString& paraName,const QByteArray& paraValue,EType type);
     void removePara(const QString& paraName);
 
     int count()const{return map.count();}
