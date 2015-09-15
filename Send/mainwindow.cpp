@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include<ztpmanager.h>
-#include<ztpprotocol.h>
 #include<QHostAddress>
 #include <QFile>
 MainWindow::MainWindow(QWidget *parent) :

@@ -12,11 +12,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ztpprotocol.cpp \
     ztpmanager.cpp
 
 HEADERS  += mainwindow.h \
-    ztpprotocol.h \
     ztpmanager.h
 
 FORMS    += mainwindow.ui
