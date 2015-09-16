@@ -40,7 +40,7 @@ void ZTPprotocol::load(QByteArray& bytes)
     for(int i = 0;i<strList.length();i++)
     {
         QList<QByteArray> subList = split(strList[i],":|:");
-        QString k = subList[0];
+        QString k = QString::fromUtf8(subList[0]);
         QByteArray v = subList[1];
         map.insert(k,v);
     }
@@ -128,7 +128,7 @@ FragmentList::FragmentList(quint16 identifier){
 		}
 ZTPManager::ZTPManager(QHostAddress host,quint16 port,
                        QHostAddress groupAddress, QObject *parent):
-    QObject(parent)
+QObject(parent)
 {
 
     _Socketlistener.bind(host,port,QUdpSocket::ShareAddress);
@@ -170,11 +170,10 @@ ZTPManager::ResultState ZTPManager::getOneZtp(ZTPprotocol& ztp)
 }
 ZTPManager::ResultState ZTPManager::waitOneZtp(ZTPprotocol& ztp,int msecs)
 {
-
-
     QEventLoop q;
     QTimer::singleShot(msecs,&q,SLOT(quit()));
     connect(this,SIGNAL(readyRead()),&q,SLOT(quit()));
+    q.exec();
     if(getOneZtp(ztp) == FAILED)
     {
         return TIMEOUT;

@@ -6,9 +6,12 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
+
 {
     ui->setupUi(this);
     ztpm = new ZTPManager(1235,QHostAddress("224.124.0.1"));
+    //thread = new MyThread(ztpm);
+    //thread->start();
     connect(ztpm,SIGNAL(readyRead()),this,SLOT(fun()));
 }
 void MainWindow::fun()
@@ -30,7 +33,7 @@ void MainWindow::fun()
     {
         QFile file("temp_"+ztpp.getPara("name"));
         file.open(QFile::Truncate|QFile::WriteOnly);
-        file.write(ztpp.getPara("content"));
+        file.write(ztpp.getPara("content",ZTPprotocol::FILE));
         file.close();
         ui->label->setPixmap(file.fileName());
     }
@@ -46,8 +49,12 @@ void MainWindow::on_pushButton_clicked()
 {
 
     ZTPprotocol ztpp;
-//    ztpp.addPara("type","hellow");
-//    ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
+    ztpp.addPara("type","hellow");
+    QString str = "กไกแไ";
+    ui->label_2->setText("กไกแไ");
+    qDebug()<<"111111111111111"<<str;
+    ztpp.addPara("thai_str","กไกแไ");
+    ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
 
     QUdpSocket udp;
     udp.bind(QHostAddress::Any);

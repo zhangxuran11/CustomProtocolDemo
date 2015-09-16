@@ -1,7 +1,7 @@
 #ifndef ZTPMANAGER_H
 #define ZTPMANAGER_H
 #include<QList>
-#include <QThread>
+#include<QThread>
 #include<QHostAddress>
 #include<QUdpSocket>
 #include<QDateTime>
@@ -18,7 +18,8 @@ public:
     enum EType{FILE};
     ZTPprotocol(){}
     explicit ZTPprotocol(QByteArray& bytes);
-    QByteArray getPara(const QString& paraName){return map[paraName];}
+    QByteArray getPara(const QString& paraName,EType type){return type == FILE?map[paraName]:"";}
+    QString getPara(const QString& paraName){return map[paraName];}
     void addPara(const QString& paraName,const QString& paraValue);
     void addPara(const QString& paraName,const QByteArray& paraValue,EType type);
     void removePara(const QString& paraName);
@@ -132,7 +133,6 @@ private slots:
         delete node;
     }
     void msleep(int msecs);
-
 };
 
 

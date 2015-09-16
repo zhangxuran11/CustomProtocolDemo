@@ -60,6 +60,19 @@
      </rect>
     </property>
     <property name="text">
+     <string>TextLabel  กไกแไ</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>20</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
      <string>TextLabel</string>
     </property>
    </widget>

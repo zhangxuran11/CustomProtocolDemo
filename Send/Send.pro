@@ -12,9 +12,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ztpmanager.cpp
+    ztpmanager.cpp \
+    mythread.cpp
 
 HEADERS  += mainwindow.h \
-    ztpmanager.h
+    ztpmanager.h \
+    mythread.h
 
 FORMS    += mainwindow.ui
