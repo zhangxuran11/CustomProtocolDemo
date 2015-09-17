@@ -1,5 +1,5 @@
 QT += core gui network
-TARGET = SUB_CustomProtocolDemo
+TARGET = CustomProtocolDemo
 TEMPLATE = app
 
 include(ZTPManager/ZTPManager.pri)

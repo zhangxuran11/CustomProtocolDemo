@@ -1,3 +1,5 @@
+INCLUDEPATH += $$PWD
+DEPENDPATH += $$PWD
 HEADERS += \
     ZTPManager/ztpmanager.h \
     ZTPManager/ztpprotocol.h \
