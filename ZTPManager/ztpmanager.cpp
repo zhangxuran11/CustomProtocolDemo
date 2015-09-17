@@ -1,131 +1,21 @@
 #include "ztpmanager.h"
+#include"ztpprotocol.h"
+#include "fragment.h"
 #include <QtAlgorithms>
 #include <QEventLoop>
 #include<QThread>
 
 
-ZTPprotocol::ZTPprotocol(QByteArray &bytes)
-{
-    load(bytes);
-}
-static QList<QByteArray> split(const QByteArray& bytes,const QByteArray & sep)
-{
-    QList<QByteArray> resList;
-    int off = 0,pos = 0;
-    while(true)
-    {
-        pos = bytes.indexOf(sep,off);
-        if(pos == -1)
-        {
-            resList.append(bytes.mid(off,-1));
-            break;
-        }
-        else
-        {
-            resList.append(bytes.mid(off,pos-off));
-        }
-        off = pos + sep.length();
-    }
-    return resList;
-
-}
-//"&head&64位无符号长度&|&paraName1:|:paraValue1&|&paraName2:|:paraValue2&end&"
-void ZTPprotocol::load(QByteArray& bytes)
-{
-    int pos = bytes.indexOf("&head&");
-    bytes.remove(pos,17);
-    pos = bytes.indexOf("&end&");
-    bytes.remove(pos,5);
-    QList<QByteArray> strList = split(bytes,"&|&");
-    for(int i = 0;i<strList.length();i++)
-    {
-        QList<QByteArray> subList = split(strList[i],":|:");
-        QString k = QString::fromUtf8(subList[0]);
-        QByteArray v = subList[1];
-        map.insert(k,v);
-    }
-}
-void ZTPprotocol::clear()
-{
-    map.clear();
-    rawData.clear();
-}
-
-void ZTPprotocol::removePara(const QString& paraName)
-{
-    map.remove(paraName);
-}
-
-void ZTPprotocol::addPara(const QString& paraName,const QString& paraValue)
-{
-    map.insert(paraName,paraValue.toUtf8());
-}
-
-void ZTPprotocol::addPara(const QString& paraName,const QByteArray& paraValue,EType type )
-{
-    if(type == FILE)
-        map.insert(paraName,paraValue);
-}
-void ZTPprotocol::genarate()
-{
-    QList<QString> keyList = map.keys();
-    rawData = "&head&00000000";
-    for(int i = 0;i<keyList.length();i++)
-    {
-        rawData.append("&|&");
-        rawData.append(keyList[i].toUtf8());
-        rawData.append(":|:");
-        rawData.append(map[keyList[i]]);
-    }
-    rawData.append("&end&");
-    qint64 len = rawData.length();
-    memcpy(rawData.data()+6,&len,8);
-}
 
 
 
 
 
 
-Fragment::Fragment(const QByteArray& bytes)
-{
-	rawPkg = bytes;
-    memcpy(&identifier,bytes.data(),2);
-    memcpy(&checksum,bytes.data()+2,2);
-    memcpy(&fragment_count,bytes.data()+4,2);
-    memcpy(&fragment_offset,bytes.data()+6,2);
-    memcpy(&len,bytes.data()+8,4);
-    data.append(bytes.data()+12,len);
-}
-       
 
-void Fragment::generate()
-{
-    rawPkg = QByteArray(12,0);
-    memcpy(rawPkg.data(),&identifier,2);
-    memcpy(rawPkg.data()+4,&fragment_count,2);
-    memcpy(rawPkg.data()+6,&fragment_offset,2);
-    memcpy(rawPkg.data()+8,&len,4);
-	rawPkg.append(data);
-	checksum = generateChecksum();
-    memcpy(rawPkg.data()+2,&checksum,2);
-}
 
-quint16 Fragment::generateChecksum(){
-	quint16 sum = 0;
-    for(quint32 i = 0;i<len+12;i++)
-	{
-		if(i>15 && i <32)
-			continue;
-		sum += data[i];
-	}
-	return sum;
-}
 
-FragmentList::FragmentList(quint16 identifier){
-			this->identifier = identifier;
-			connect(&timer,SIGNAL(timeout()),this,SLOT(send_timeout()));
-		}
+
 ZTPManager::ZTPManager(QHostAddress host,quint16 port,
                        QHostAddress groupAddress, QObject *parent):
 QObject(parent)
@@ -156,11 +46,22 @@ ZTPManager::ZTPManager(quint16 port,
     _timeout = 3000;
 
 }
+ZTPManager::~ZTPManager()
+{
+    for(QMap<quint16,FragmentList*>::iterator it = workMap.begin();it !=workMap.end();it++)
+    {
+        delete it.value();
+    }
+    for(QList<ZTPprotocol*>::iterator it = ztpList.begin();it !=ztpList.end();it++)
+    {
+        delete *it;
+    }
+}
 ZTPManager::ResultState ZTPManager::getOneZtp(ZTPprotocol& ztp)
 {
     if(ztpList.isEmpty())
     {
-        qDebug()<<"ZTP LIST is empty!!";
+//        qDebug()<<"ZTP LIST is empty!!";
         return FAILED;
     }
     ZTPprotocol* pztp = ztpList.takeFirst();
@@ -264,4 +165,10 @@ void ZTPManager::onRead()
         ztpList.append(ztp);
 		emit readyRead();
     }
+}
+
+void ZTPManager::onTimeout(quint16 identifier){
+    FragmentList* node = workMap[identifier];
+    workMap.remove(identifier);
+    delete node;
 }

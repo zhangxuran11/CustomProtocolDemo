@@ -1,19 +1,20 @@
 #ifndef ZTPPROTOCOL_H
 #define ZTPPROTOCOL_H
-#include <QByteArray>
-#include <QMap>
-#include <QStringList>
-class QString;
+#include<QByteArray>
+#include<QMap>
+#include<QString>
 class ZTPprotocol
 {
-    QMap<QString, QString> map;
-    //QMap<QString, QByteArray> map;
+    QMap<QString, QByteArray> map;
     QByteArray rawData;
 public:
+    enum EType{FILE};
     ZTPprotocol(){}
     explicit ZTPprotocol(QByteArray& bytes);
+    QByteArray getPara(const QString& paraName,EType type){return type == FILE?map[paraName]:"";}
     QString getPara(const QString& paraName){return map[paraName];}
     void addPara(const QString& paraName,const QString& paraValue);
+    void addPara(const QString& paraName,const QByteArray& paraValue,EType type);
     void removePara(const QString& paraName);
 
     int count()const{return map.count();}
@@ -21,7 +22,7 @@ public:
 
 public:
     void genarate();
-    const QByteArray& getRwaData()const{return rawData;}
+    QByteArray& getRwaData(){return rawData;}
     void load(QByteArray& bytes);
     void clear();
 };

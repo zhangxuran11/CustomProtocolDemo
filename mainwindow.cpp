@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include<ztpmanager.h>
+#include"ZTPManager/ztpmanager.h"
 #include<QHostAddress>
 #include <QFile>
 MainWindow::MainWindow(QWidget *parent) :
@@ -65,9 +65,9 @@ void MainWindow::on_pushButton_clicked()
     ztpp.addPara("name","aaa.png");
     ztpp.addPara("content",file.readAll(),ZTPprotocol::FILE);
     file.close();
-    //qDebug()<<"file readall :"<<file.readAll().length();
-    //qDebug()<<"file readall :"<<file.readAll().length();
-    //qDebug()<<"udp send len :"<<udp.writeDatagram(file.readAll().data(),65507,QHostAddress("224.124.0.1"),3333);
+    qDebug()<<"file readall :"<<file.readAll().length();
+    qDebug()<<"file readall :"<<file.readAll().length();
+    qDebug()<<"udp send len :"<<udp.writeDatagram(file.readAll().data(),65507,QHostAddress("224.124.0.1"),3333);
 
 
     ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
