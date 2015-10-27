@@ -12,7 +12,7 @@ public:
     ZTPprotocol(){}
     explicit ZTPprotocol(QByteArray& bytes);
     QByteArray getPara(const QString& paraName,EType type){return type == FILE?map[paraName]:"";}
-    QString getPara(const QString& paraName){return map[paraName];}
+    QString getPara(const QString& paraName){return QString::fromUtf8(map[paraName]);}
     void addPara(const QString& paraName,const QString& paraValue);
     void addPara(const QString& paraName,const QByteArray& paraValue,EType type);
     void removePara(const QString& paraName);
