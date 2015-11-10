@@ -83,21 +83,24 @@ ZTPManager::ResultState ZTPManager::SendOneZtp(ZTPprotocol& ztp,const QHostAddre
 	quint16 fragment_offset = 1;
 	for(int i = 0;i < fragment_count;i++)
 	{
-		Fragment fragment;
-		fragment.identifier = identifier; //用utc的低16位作为分片标识
-		fragment.fragment_count = fragment_count;
+
+        Fragment fragment;
+        fragment.identifier = identifier; //用utc的低16位作为分片标识
+        fragment.fragment_count = fragment_count;
         fragment.fragment_offset = fragment_offset++;
         fragment.data = ztp.getRwaData().left(MTU);
         ztp.getRwaData().remove(0,MTU);
         fragment.len = fragment.data.length();
         fragment.generate();
         int sendLen = _Socketlistener.writeDatagram(fragment.rawPkg,host,port);
-		if(sendLen != fragment.rawPkg.length())
-		{
-			qDebug("send ZTP data error: has data %d bytes and actually send %d bytes!!\n",
-                    fragment.len,sendLen);
-			return FAILED;
-		}
+        qDebug()<<"fragment.rawPkg.lengt = "<<fragment.rawPkg.length();
+        //_Socketlistener.writeDatagram("aaaaaa",host,port);
+//        if(sendLen != fragment.rawPkg.length())
+//        {
+//            qDebug("send ZTP data error: has data %d bytes and actually send %d bytes!!\n",
+//                    fragment.len,sendLen);
+//            return FAILED;
+//        }
 //        qDebug()<<"send---fragment : "<<fragment.identifier<<" "<<fragment.checksum<<" "<<fragment.fragment_count<<" "<<fragment.fragment_offset<<" "<<fragment.data.length();
         msleep(1);
     }
@@ -151,6 +154,8 @@ void ZTPManager::onRead()
         ZTPprotocol* ztp = new ZTPprotocol(recvBuff);
         ztp->addPara("RemoteHost",remoteHost.toString());
         ztp->addPara("RemotePort",QString::number(remotePort));
+        if(ztpList.length()>=5)
+            delete ztpList.takeFirst();
         ztpList.append(ztp);
 		emit readyRead();
     }

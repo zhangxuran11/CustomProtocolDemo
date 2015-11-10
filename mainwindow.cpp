@@ -9,13 +9,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
-    timer.setInterval(1000);
+    timer.setInterval(10);
     timer.setSingleShot(false);
     connect(&timer,SIGNAL(timeout()),this,SLOT(send()));
-    timer.start();
+    //timer.start();
     ztpm = new ZTPManager(1235,QHostAddress("224.124.0.1"));
-    //connect(ztpm,SIGNAL(readyRead()),this,SLOT(recv()));
-    qDebug("only send...");
+    connect(ztpm,SIGNAL(readyRead()),this,SLOT(recv()));
+    qDebug("only recv...");
 }
 void MainWindow::send()
 {
@@ -24,8 +24,7 @@ void MainWindow::send()
     ztpp.addPara("para1","aaa");
     ztpp.addPara("para2","bbb");
     ztpp.addPara("para3","ccc");
-    ztpp.genarate();
-    //ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
+    ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
 }
 void MainWindow::recv()
 {

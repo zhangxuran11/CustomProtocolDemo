@@ -14,5 +14,5 @@ SOURCES += \
     mainwindow.cpp \
     main.cpp
 mytarget.target = all
-mytarget.commands = scp ./${TARGET} root@192.168.13.24:/${TARGET}_only_send
+mytarget.commands = scp ./${TARGET} root@192.168.1.30:/${TARGET}_only_recv
 QMAKE_EXTRA_TARGETS += mytarget
