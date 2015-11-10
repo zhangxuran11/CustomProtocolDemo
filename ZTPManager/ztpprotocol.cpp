@@ -1,9 +1,17 @@
 #include "ztpprotocol.h"
-
+#include<QDebug>
 
 ZTPprotocol::ZTPprotocol(QByteArray &bytes)
 {
     load(bytes);
+}
+void ZTPprotocol::print()
+{
+    QList<QString> keyList = map.keys();
+    for(int i = 0;i < keyList.count();i++)
+    {
+        qDebug()<<QString("%1 : %2").arg(keyList[i]).arg(QString::fromUtf8(map[keyList[i]]));
+    }
 }
 static QList<QByteArray> split(const QByteArray& bytes,const QByteArray & sep)
 {

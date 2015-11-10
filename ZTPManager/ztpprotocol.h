@@ -25,6 +25,7 @@ public:
     QByteArray& getRwaData(){return rawData;}
     void load(QByteArray& bytes);
     void clear();
+    void print();
 };
 
 #endif // ZTPPROTOCOL_H

@@ -5,17 +5,6 @@
 #include <QEventLoop>
 #include<QThread>
 
-
-
-
-
-
-
-
-
-
-
-
 ZTPManager::ZTPManager(QHostAddress host,quint16 port,
                        QHostAddress groupAddress, QObject *parent):
 QObject(parent)

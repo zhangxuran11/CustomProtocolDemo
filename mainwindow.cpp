@@ -9,10 +9,32 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
+    timer.setInterval(1000);
+    timer.setSingleShot(false);
+    connect(&timer,SIGNAL(timeout()),this,SLOT(send()));
+    timer.start();
     ztpm = new ZTPManager(1235,QHostAddress("224.124.0.1"));
-    //thread = new MyThread(ztpm);
-    //thread->start();
-    connect(ztpm,SIGNAL(readyRead()),this,SLOT(fun()));
+    //connect(ztpm,SIGNAL(readyRead()),this,SLOT(recv()));
+    qDebug("only send...");
+}
+void MainWindow::send()
+{
+    qDebug("send...");
+    ZTPprotocol ztpp;
+    ztpp.addPara("para1","aaa");
+    ztpp.addPara("para2","bbb");
+    ztpp.addPara("para3","ccc");
+    ztpp.genarate();
+    //ztpm->SendOneZtp(ztpp,QHostAddress("224.124.0.1"),1235);
+}
+void MainWindow::recv()
+{
+    ZTPprotocol ztpp;
+    ztpm->getOneZtp(ztpp);
+    qDebug("recv ztp...");
+    qDebug("print begin...");
+    ztpp.print();
+    qDebug("print end.");
 }
 void MainWindow::fun()
 {
